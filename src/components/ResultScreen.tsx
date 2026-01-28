@@ -1,10 +1,12 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
+import html2canvas from "html2canvas";
 import { 
   questions, 
   intelligenceInfo, 
   IntelligenceType 
 } from "@/data/questions";
 import ResultChart from "./ResultChart";
+import ShareableCard from "./ShareableCard";
 
 interface ResultScreenProps {
   answers: Record<number, number>;
@@ -14,6 +16,9 @@ interface ResultScreenProps {
 }
 
 const ResultScreen = ({ answers, studentName, studentClass, onRestart }: ResultScreenProps) => {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const shareableRef = useRef<HTMLDivElement>(null);
+
   const scores = useMemo(() => {
     const scoreMap: Record<IntelligenceType, number> = {
       linguistic: 0,
@@ -40,7 +45,7 @@ const ResultScreen = ({ answers, studentName, studentClass, onRestart }: ResultS
       .map(([type, score]) => ({
         type: type as IntelligenceType,
         score,
-        maxScore: 15, // 3 questions x 5 max points
+        maxScore: 15,
         percentage: Math.round((score / 15) * 100),
       }))
       .sort((a, b) => b.score - a.score);
@@ -61,8 +66,42 @@ const ResultScreen = ({ answers, studentName, studentClass, onRestart }: ResultS
     window.open(`https://wa.me/6285179876417?text=${message}`, '_blank');
   };
 
+  const handleDownloadImage = async () => {
+    if (!shareableRef.current || isGenerating) return;
+    
+    setIsGenerating(true);
+    
+    try {
+      const canvas = await html2canvas(shareableRef.current, {
+        scale: 1,
+        useCORS: true,
+        backgroundColor: null,
+        logging: false,
+      });
+      
+      const link = document.createElement('a');
+      link.download = `hasil-tes-kecerdasan-${studentName.replace(/\s+/g, '-').toLowerCase()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error('Error generating image:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-brutal-lime p-4 md:p-8">
+      {/* Hidden shareable card for image generation */}
+      <div className="fixed left-[-9999px] top-0">
+        <ShareableCard
+          ref={shareableRef}
+          studentName={studentName}
+          topIntelligence={topIntelligence}
+          sortedScores={sortedScores}
+        />
+      </div>
+
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="brutal-box-xl bg-card p-6 md:p-10 mb-6">
@@ -91,6 +130,37 @@ const ResultScreen = ({ answers, studentName, studentClass, onRestart }: ResultS
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Download for Instagram Story */}
+        <div className="brutal-box-xl bg-brutal-purple p-6 md:p-10 mb-6 text-center">
+          <h3 className="text-title mb-4 text-card">📸 Share ke Instagram Story</h3>
+          <p className="font-mono text-sm mb-6 text-card/80">
+            Download hasil lo sebagai gambar (1080x1920) yang pas buat IG Story!
+          </p>
+          <button
+            onClick={handleDownloadImage}
+            disabled={isGenerating}
+            className={`brutal-btn bg-brutal-yellow text-xl py-4 px-8 inline-flex items-center gap-3 ${
+              isGenerating ? 'opacity-70 cursor-wait' : ''
+            }`}
+          >
+            {isGenerating ? (
+              <>
+                <svg className="w-6 h-6 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                  <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12" />
+                </svg>
+                GENERATING...
+              </>
+            ) : (
+              <>
+                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                </svg>
+                DOWNLOAD GAMBAR
+              </>
+            )}
+          </button>
         </div>
 
         {/* Chart */}
