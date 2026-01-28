@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { classOptions } from "@/data/questions";
 
 interface WelcomeScreenProps {
   onStart: (name: string, kelas: string) => void;
@@ -16,7 +15,7 @@ const WelcomeScreen = ({ onStart }: WelcomeScreenProps) => {
       setTimeout(() => setIsShaking(false), 500);
       return;
     }
-    onStart(name.trim(), kelas);
+    onStart(name.trim(), kelas.trim());
   };
 
   const isValid = name.trim().length > 0;
@@ -47,11 +46,11 @@ const WelcomeScreen = ({ onStart }: WelcomeScreenProps) => {
               <span className="text-sm font-bold uppercase tracking-wider">Tes Kecerdasan Majemuk</span>
             </div>
             <h1 className="text-display text-4xl md:text-6xl lg:text-7xl mb-4 leading-tight">
-              SIAPA LO<br />SEBENARNYA?
+              KENALI DIRIMU<br />LEBIH DALAM!
             </h1>
             <p className="font-mono text-sm md:text-base text-foreground/80 max-w-md mx-auto">
-              Temukan tipe kecerdasan dominan lo berdasarkan teori Howard Gardner. 
-              24 pertanyaan, 5 menit, insights seumur hidup!
+              Temukan tipe kecerdasan dominanmu berdasarkan teori Howard Gardner. 
+              24 pertanyaan, 5 menit, hasil yang bermanfaat!
             </p>
           </div>
 
@@ -64,32 +63,23 @@ const WelcomeScreen = ({ onStart }: WelcomeScreenProps) => {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ketik nama lo di sini..."
+                placeholder="Ketik namamu di sini..."
                 className="brutal-input"
                 maxLength={50}
               />
             </div>
 
-            {/* Class dropdown */}
+            {/* Class text input */}
             <div>
               <label className="block text-title text-sm mb-2">Kelas</label>
-              <div className="relative">
-                <select
-                  value={kelas}
-                  onChange={(e) => setKelas(e.target.value)}
-                  className="brutal-input appearance-none cursor-pointer pr-12 bg-card"
-                >
-                  <option value="">Pilih kelas lo...</option>
-                  {classOptions.map((option) => (
-                    <option key={option} value={option}>{option}</option>
-                  ))}
-                </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
-                </div>
-              </div>
+              <input
+                type="text"
+                value={kelas}
+                onChange={(e) => setKelas(e.target.value)}
+                placeholder="Contoh: X IPA 1, XI IPS 2..."
+                className="brutal-input"
+                maxLength={20}
+              />
             </div>
 
             {/* Submit button */}
@@ -108,7 +98,7 @@ const WelcomeScreen = ({ onStart }: WelcomeScreenProps) => {
 
           {/* Footer note */}
           <p className="text-center text-xs font-mono text-foreground/60 mt-8">
-            * Tes ini bukan untuk menilai baik/buruk, tapi untuk mengenal diri sendiri lebih dalam
+            * Tes ini untuk mengenal kelebihan diri sendiri, bukan untuk menilai baik atau buruk
           </p>
         </div>
       </div>

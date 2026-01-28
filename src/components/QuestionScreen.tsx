@@ -6,6 +6,15 @@ interface QuestionScreenProps {
   studentName: string;
 }
 
+const progressColors = [
+  "bg-brutal-pink",
+  "bg-brutal-cyan", 
+  "bg-brutal-lime",
+  "bg-brutal-orange",
+  "bg-brutal-purple",
+  "bg-brutal-yellow",
+];
+
 const QuestionScreen = ({ onComplete, studentName }: QuestionScreenProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -58,6 +67,7 @@ const QuestionScreen = ({ onComplete, studentName }: QuestionScreenProps) => {
   ];
   
   const currentBg = bgColors[currentIndex % bgColors.length];
+  const currentProgressColor = progressColors[currentIndex % progressColors.length];
 
   return (
     <div className={`min-h-screen ${currentBg} p-4 md:p-8 transition-colors duration-300`}>
@@ -72,18 +82,34 @@ const QuestionScreen = ({ onComplete, studentName }: QuestionScreenProps) => {
           </div>
         </div>
 
-        {/* Progress bar */}
-        <div className="brutal-box bg-card p-1 mb-8">
+        {/* Animated Progress bar */}
+        <div className="brutal-box bg-card p-1 mb-8 relative overflow-hidden">
+          {/* Background segments */}
+          <div className="absolute inset-1 flex">
+            {Array.from({ length: questions.length }).map((_, i) => (
+              <div 
+                key={i} 
+                className={`flex-1 ${i < currentIndex + 1 ? progressColors[i % progressColors.length] : 'bg-muted'} 
+                  ${i > 0 ? 'border-l-2 border-foreground/20' : ''} 
+                  transition-all duration-500`}
+              />
+            ))}
+          </div>
+          {/* Progress overlay */}
           <div 
-            className="h-4 bg-foreground transition-all duration-500 ease-out"
+            className={`h-5 ${currentProgressColor} relative z-10 transition-all duration-500 ease-out flex items-center justify-end pr-2`}
             style={{ width: `${progress}%` }}
-          />
+          >
+            <span className="text-[10px] font-bold text-foreground/80">
+              {Math.round(progress)}%
+            </span>
+          </div>
         </div>
 
         {/* Question card */}
         <div className={`brutal-box-xl bg-card p-6 md:p-10 mb-6 ${isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'} transition-all duration-200`}>
           <div className="mb-8">
-            <div className="inline-block bg-brutal-cyan px-3 py-1 border-[2px] border-foreground mb-4 text-xs font-bold uppercase">
+            <div className={`inline-block ${currentProgressColor} px-3 py-1 border-[2px] border-foreground mb-4 text-xs font-bold uppercase`}>
               Pertanyaan {currentIndex + 1}
             </div>
             <h2 className="text-headline text-xl md:text-2xl lg:text-3xl leading-tight">
@@ -122,7 +148,7 @@ const QuestionScreen = ({ onComplete, studentName }: QuestionScreenProps) => {
               onClick={handlePrev}
               className="brutal-btn bg-card flex-shrink-0"
             >
-              ← BACK
+              ← KEMBALI
             </button>
           )}
           <button
@@ -134,13 +160,13 @@ const QuestionScreen = ({ onComplete, studentName }: QuestionScreenProps) => {
                 : "bg-muted opacity-50 cursor-not-allowed"
             }`}
           >
-            {isLastQuestion ? "LIHAT HASIL →" : "NEXT →"}
+            {isLastQuestion ? "LIHAT HASIL →" : "LANJUT →"}
           </button>
         </div>
 
         {/* Tips */}
         <p className="text-center font-mono text-xs mt-6 text-foreground/70">
-          💡 Tip: Jawab dengan jujur, gak ada jawaban benar atau salah!
+          💡 Tip: Jawab dengan jujur sesuai kondisimu, tidak ada jawaban benar atau salah!
         </p>
       </div>
     </div>
